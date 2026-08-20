@@ -26,6 +26,35 @@
           "getting-started/creating-your-account",
           "getting-started/finding-your-way-around"
         ]
+      },
+      {
+        "group": "Attending events",
+        "icon": "ticket",
+        "pages": [
+          "attending/discovering-events",
+          "attending/registering",
+          "attending/waitlists",
+          "attending/managing-your-tickets",
+          "attending/saving-events",
+          "attending/adding-to-calendar"
+        ]
+      },
+      {
+        "group": "Profiles & community",
+        "icon": "users",
+        "pages": []
+      },
+      {
+        "group": "Hosting events",
+        "icon": "calendar-plus",
+        "pages": [
+          "hosting/creating-an-event"
+        ]
+      },
+      {
+        "group": "Reference",
+        "icon": "book",
+        "pages": []
       }
     ]
   },
