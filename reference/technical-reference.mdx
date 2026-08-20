@@ -1,0 +1,80 @@
+---
+title: "Technical reference"
+description: "For developers: architecture, data model, and security rules behind Gathere."
+sidebarTitle: "Technical reference"
+icon: "code"
+---
+
+This page is for developers working on Gathere. Everything else in these docs is written for end users.
+
+## Stack
+
+- **Frontend:** React \+ TypeScript, built with Vite, styled with Tailwind CSS. Icons come from `lucide-react`.
+- **Routing:** a lightweight hash-based router (`src/lib/router.ts`) — `navigate(path)` sets `window.location.hash`, and `useRoute()` subscribes to `hashchange`. No router library.
+- **Backend:** Supabase (Postgres, Auth, Storage). The browser talks to Supabase directly via the client in `src/lib/supabase.ts`; all access control is enforced by Row Level Security (RLS).
+- **Auth state:** `src/context/AuthContext.tsx` exposes `session`, `profile`, `savedEventIds`, `toggleSaved`, `signOut`, and `refreshProfile`.
+
+## Routes
+
+| Hash route | Screen |
+| --- | --- |
+| `/` | Landing page (standalone, signed-out) |
+| `/explore` | Explore — public upcoming events (default after sign-in) |
+| `/dashboard` | My events (host dashboard) |
+| `/tickets` | My tickets |
+| `/saved` | Saved events |
+| `/profile`, `/profile/edit` | Own profile view and editor |
+| `/u/:id` | Another member's profile / organizer page |
+| `/event/:id` | Public event page |
+| `/manage/:id` | Host manage screen for an event |
+
+## Data model
+
+<ResponseField name="profiles">
+  One row per user (`id` references `auth.users`). Created automatically on signup by the `handle_new_user()` trigger. Fields: `full_name`, `avatar_url`, `bio`, `job_title`, `company`, `location`, `website`, `linkedin`, `twitter`, `github`, `interests` (text\[\]).
+</ResponseField>
+
+<ResponseField name="events">
+  `host_id` (defaults to `auth.uid()`), `title`, `description`, `cover_url`, `start_at`, `end_at`, `location_type` (`physical` | `online`), `venue`, `capacity` (null = unlimited), `visibility` (`public` | `private`), `status` (`draft` | `published` | `cancelled`).
+</ResponseField>
+
+<ResponseField name="event_secrets">
+  One row per event holding `meeting_url`. Readable only by the host or confirmed guests — this is how online meeting links stay hidden until registration.
+</ResponseField>
+
+<ResponseField name="registrations">
+  Unique per `(event_id, user_id)`. `status` (`confirmed` | `waitlisted` | `cancelled`) and `checked_in` (boolean).
+</ResponseField>
+
+<ResponseField name="saved_events">
+  Owner-scoped bookmarks, unique per `(user_id, event_id)`.
+</ResponseField>
+
+<ResponseField name="event_updates">
+  Host announcements (`body`), readable by the host and the event's non-cancelled registrants.
+</ResponseField>
+
+## Database functions (SECURITY DEFINER)
+
+- **`register_for_event(p_event_id)`** — atomically registers the caller, assigning `confirmed` or `waitlisted` based on capacity (locks the event row `FOR UPDATE`); reactivates a previously cancelled row. Signed-in callers only.
+- **`cancel_registration(p_event_id)`** — cancels the caller's registration and promotes the oldest waitlisted guest if a confirmed spot opens.
+- **`get_event_counts(p_event_ids)`** — returns confirmed/waitlisted counts per event so guests see availability without reading other guests' rows. Granted to `anon` \+ `authenticated`.
+
+Inserts into `registrations` go through `register_for_event` rather than direct table writes.
+
+## Security model
+
+- **RLS is enabled on every table.** Policies are written per verb (no `FOR ALL`).
+- **profiles:** readable by authenticated members only; each user updates only their own row.
+- **events:** `published`/`cancelled` events are readable by everyone; drafts are visible only to their host. Hosts have full CRUD on their own events.
+- **event\_secrets / event\_updates:** scoped to the host and (for reads) the event's registered guests.
+- **registrations:** a user sees their own rows; a host sees rows for events they host and can update `checked_in`.
+- **Execute grants** on the SECURITY DEFINER functions are tightened so anonymous visitors can't call the mutation functions; both also verify `auth.uid()` internally.
+
+## Storage
+
+Profile photos live in a public `avatars` bucket. Files are publicly readable (so `<img>` tags render them), but writes are restricted to a folder named after the member's own user id (`(storage.foldername(name))[1] = auth.uid()`), with a 2 MB, images-only limit enforced on upload.
+
+## Out of scope (by design)
+
+Paid tickets/payments and email notifications are intentionally not implemented in this version.
