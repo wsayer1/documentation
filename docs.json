@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Gathere",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#066804",
+    "light": "#66e66b",
+    "dark": "#001c0a"
   },
   "favicon": "/favicon.svg",
   "navigation": {
@@ -71,8 +71,8 @@
     ]
   },
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/images/Gatherly.png",
+    "dark": "/images/gatherlydark.png"
   },
   "navbar": {
     "links": []
@@ -93,5 +93,11 @@
     "socials": {
     }
   },
-  "description": "Guides for Gathere — the simple way to host and discover free tech and business events."
+  "description": "Guides for Gathere — the simple way to host and discover free tech and business events.",
+  "background": {
+    "color": {
+      "light": "#f3fde3",
+      "dark": "#030c01"
+    }
+  }
 }
