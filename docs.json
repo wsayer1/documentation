@@ -42,19 +42,29 @@
       {
         "group": "Profiles & community",
         "icon": "users",
-        "pages": []
+        "pages": [
+          "profiles/your-profile",
+          "profiles/organizer-pages"
+        ]
       },
       {
         "group": "Hosting events",
         "icon": "calendar-plus",
         "pages": [
-          "hosting/creating-an-event"
+          "hosting/creating-an-event",
+          "hosting/event-visibility",
+          "hosting/managing-an-event",
+          "hosting/checking-in-guests",
+          "hosting/posting-announcements",
+          "hosting/cancelling-an-event"
         ]
       },
       {
         "group": "Reference",
         "icon": "book",
-        "pages": []
+        "pages": [
+          "reference/glossary"
+        ]
       }
     ]
   },
